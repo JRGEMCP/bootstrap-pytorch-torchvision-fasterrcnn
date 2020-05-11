@@ -15,12 +15,6 @@ def train_one_epoch(model_conf, model, optimizer, data_loader, device, epoch, tf
     header = 'Epoch: [{}]'.format(epoch)
 
     iterations = 0
-    lr_scheduler = None
-    if epoch == 0:
-        warmup_factor = 1. / 1000
-        warmup_iters = min(1000, len(data_loader) - 1)
-
-        lr_scheduler = utils.warmup_lr_scheduler(optimizer, warmup_iters, warmup_factor)
 
     for images, targets in metric_logger.log_every(data_loader, print_freq, header):
 
@@ -30,6 +24,7 @@ def train_one_epoch(model_conf, model, optimizer, data_loader, device, epoch, tf
         loss_dict = model(images, targets)
         iterations += 1
         losses = sum(loss for loss in loss_dict.values())
+
         # reduce losses over all GPUs for logging purposes
         loss_dict_reduced = utils.reduce_dict(loss_dict)
         losses_reduced = sum(loss for loss in loss_dict_reduced.values())
@@ -43,10 +38,6 @@ def train_one_epoch(model_conf, model, optimizer, data_loader, device, epoch, tf
         optimizer.zero_grad()
         losses.backward()
         optimizer.step()
-
-        if lr_scheduler is not None:
-
-            lr_scheduler.step()
 
         metric_logger.update(loss=losses_reduced, **loss_dict_reduced)
         metric_logger.update(lr=optimizer.param_groups[0]["lr"])
@@ -62,10 +53,6 @@ def train_one_epoch(model_conf, model, optimizer, data_loader, device, epoch, tf
 
             tfb_logger.add_scalars(main_tag='logs_s_{}/losses'.format("1"),
                                    tag_scalar_dict=info,
-                                   global_step=(epoch * len(data_loader)) + iterations)
-            if lr_scheduler is not None:
-                tfb_logger.add_scalars(main_tag='logs_s_{}/lr'.format("1"),
-                                   tag_scalar_dict={"lr": lr_scheduler.get_last_lr()},
                                    global_step=(epoch * len(data_loader)) + iterations)
 
     return metric_logger

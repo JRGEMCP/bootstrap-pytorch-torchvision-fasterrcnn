@@ -78,7 +78,7 @@ class CustomCocoDataset(CocoDetection):
 if __name__ == "__main__":
     import json
 
-    with open("../../dataset.json") as f:
+    with open("../../dataset_template.json") as f:
         config_json = json.load(f)
 
     with open("../../config.json") as fp:

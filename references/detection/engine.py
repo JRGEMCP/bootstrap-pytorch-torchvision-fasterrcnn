@@ -86,21 +86,24 @@ def evaluate(model, data_loader, device):
 
     coco = get_coco_api_from_dataset(data_loader.dataset)
     iou_types = _get_iou_types(model)
+    print("got iou types into eval")
     coco_evaluator = CocoEvaluator(coco, iou_types)
 
+    print("starting up images")
     for images, targets in metric_logger.log_every(data_loader, 100, header):
         images = list(img.to(device) for img in images)
         targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
 
-        torch.cuda.synchronize()
+        #torch.cuda.synchronize()
         model_time = time.time()
         outputs = model(images)
-
+        print("outputs retrieved")
         outputs = [{k: v.to(cpu_device) for k, v in t.items()} for t in outputs]
         model_time = time.time() - model_time
 
         res = {target["image_id"].item(): output for target, output in zip(targets, outputs)}
         evaluator_time = time.time()
+        print("cocoevaluator updating...")
         coco_evaluator.update(res)
         evaluator_time = time.time() - evaluator_time
         metric_logger.update(model_time=model_time, evaluator_time=evaluator_time)

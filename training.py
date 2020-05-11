@@ -40,6 +40,10 @@ def train(data_conf, model_conf, **kwargs):
                                                        num_workers=model_conf["pytorch_engine"]["num_workers"],
                                                        collate_fn=utils.collate_fn)
 
+    if model_conf["pytorch_engine"]["test_dataloader"]:
+
+        return
+
     if model_conf["hyperParameters"]["net"] == "spineless_model":
         model = get_model_instance_segmentation(data_conf=data_conf, model_conf=model_conf)
     else:

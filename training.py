@@ -93,7 +93,7 @@ def train(data_conf, model_conf, **kwargs):
 
         if model_conf["pytorch_engine"]["enable_tfb"]:
             logger.add_scalars(main_tag='logs_s_{}/lr'.format("1"),
-                                   tag_scalar_dict={"lr": lr_scheduler.get_lr()},
+                                   tag_scalar_dict={"lr": lr_scheduler.get_last_lr()},
                                    global_step=epoch)
 
         if epoch % 5 == 0 or epoch == model_conf["hyperParameters"]["epoch_max"]:

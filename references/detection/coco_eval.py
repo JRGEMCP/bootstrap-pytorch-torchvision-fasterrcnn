@@ -1,5 +1,4 @@
 import json
-
 import numpy as np
 import copy
 import torch
@@ -11,10 +10,10 @@ import pycocotools.mask as mask_util
 
 from collections import defaultdict
 
-import references.detection.utils as utils
+from references.detection import utils
 
 
-class CocoEvaluator():
+class CocoEvaluator(object):
     def __init__(self, coco_gt, iou_types):
         assert isinstance(iou_types, (list, tuple))
         coco_gt = copy.deepcopy(coco_gt)

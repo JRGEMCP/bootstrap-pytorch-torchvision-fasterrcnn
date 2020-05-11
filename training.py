@@ -9,7 +9,7 @@ from model.model_resnet101_faster_rcnn import ModelResnet101FasterRCNN
 from data_loader.customcocodataset import CustomCocoDataset
 from references.detection import utils
 from model.model_resnet50_faster_rcnn import get_model_instance_segmentation
-from references.detection.engine import train_one_epoch
+from references.detection.engine import train_one_epoch, evaluate
 
 
 def train(data_conf, model_conf, **kwargs):
@@ -71,6 +71,10 @@ def train(data_conf, model_conf, **kwargs):
     # lr_scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer=optimizer,
     #                                                      gamma=model_conf["hyperParameters"]["learning_decay_gamma"])
 
+    if model_conf["pytorch_engine"]["evaluate_only_mode"]:
+        evaluate(model, training_data_loader, device=device)
+        return
+
     if model_conf["pytorch_engine"]["enable_tfb"]:
         from tensorboardX import SummaryWriter
         logger = SummaryWriter(output_dir + "/logs")
@@ -109,6 +113,8 @@ def train(data_conf, model_conf, **kwargs):
                 'data_conf': data_conf,
             }, save_name)
             print('save model: {}'.format(save_name))
+
+            evaluate(model, training_data_loader, device=device)
 
     if model_conf["pytorch_engine"]["enable_tfb"]:
         logger.close()

@@ -41,7 +41,8 @@ def train(data_conf, model_conf, **kwargs):
                                                        collate_fn=utils.collate_fn)
 
     if model_conf["pytorch_engine"]["test_dataloader"]:
-
+        for object, target in training_data_loader:
+            print(str(target))
         return
 
     if model_conf["hyperParameters"]["net"] == "spineless_model":

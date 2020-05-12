@@ -3,14 +3,14 @@ import os
 from PIL import ImageDraw
 
 
-def vis_detections(data_conf, model_conf, im, class_names, predictions):
+def vis_detections(data_conf, model_conf, im, class_names, predictions, image_ids):
 
     print(str(predictions))
     """Visual debugging of detections."""
     for item in range(len(predictions)):
         bboxes = predictions["boxes"]
         labels = predictions["labels"]
-        image_ids = predictions["image_id"]
+        #image_ids = predictions["image_id"]
         scores = predictions["scores"]
 
         assert len(bboxes) == len(labels) == len(scores)
@@ -33,12 +33,18 @@ def vis_detections(data_conf, model_conf, im, class_names, predictions):
                                  + "/" +
                                  data_conf["image_data_testing_id"], exist_ok=True)
 
+        # TODO: unhardcode from batch_size 1, ie index 0th image_id everytime
+
+        path_tokens = image_ids[0].split("/")
+
+        file_name = path_tokens[len(path_tokens) - 1]
+
         im.save(data_conf["demo_out_image_dir"]
                                  + "/" +
                                  model_conf["hyperParameters"]["net"]
                                  + "/" +
                                  data_conf["image_data_testing_id"] + "/" +
-                                 str(image_ids.item()) + "_result.jpg", "JPEG")
+                                 file_name + "_result.jpg", "JPEG")
     return im
 
 

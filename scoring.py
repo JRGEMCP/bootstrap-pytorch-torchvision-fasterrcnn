@@ -52,7 +52,7 @@ def evaluate(data_conf, model_conf, **kwargs):
 
     torch.manual_seed(1)
 
-    # testing_dataset = CustomCocoDataset(data_conf=data_conf, model_conf=model_conf, testing_mode_on=True)
+    #testing_dataset = CustomCocoDataset(data_conf=data_conf, model_conf=model_conf, testing_mode_on=True)
 
     testing_dataset = ImageFolder(root=data_conf["demo_in_image_dir"], transform=transforms.Compose([transforms.ToTensor()]))
 
@@ -94,7 +94,7 @@ def evaluate(data_conf, model_conf, **kwargs):
     print("Evaluation complete")
 
 
-def visualize_data(data_conf, model_conf, images, metadatas):
+def visualize_data(data_conf, model_conf, images, metadatas, image_ids=None):
 
     assert(len(images) == len(metadatas))
 
@@ -108,11 +108,13 @@ def visualize_data(data_conf, model_conf, images, metadatas):
                              class_names=data_conf["classes_available"],
                              targets=metadatas[i])
         else:
+
             vis_detections(data_conf=data_conf,
                            model_conf=model_conf,
                            im=binary_image,
                            class_names=data_conf["classes_available"],
-                           predictions=metadatas[i])
+                           predictions=metadatas[i],
+                           image_ids=image_ids)
 
 
 @torch.no_grad()
@@ -129,11 +131,16 @@ def exec_evaluate(data_conf, model_conf, model, data_loader, device):
             print("received outputs")
             outputs = [{k: v.to(device) for k, v in t.items()} for t in outputs]
 
+            image_ids = {}
+            for filename, id in data_loader.dataset.imgs:
+                image_ids[id] = filename
+
             if model_conf["hyperParameters"]["testing"]["enable_visualization"]:
 
                 visualize_data(data_conf=data_conf,
                                model_conf=model_conf,
                                images=images,
+                               image_ids=image_ids,
                                metadatas=outputs)
         except Exception as excp:
             print("Exception occurred on an image set " + str(images) + ".. skipping")

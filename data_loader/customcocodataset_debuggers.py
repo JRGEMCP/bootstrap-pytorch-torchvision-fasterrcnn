@@ -19,10 +19,11 @@ def vis_detections(data_conf, model_conf, im, class_names, predictions, image_id
         for box in bboxes.numpy():
             print("assessing score " + str(scores[index]))
             if scores[index] > model_conf["hyperParameters"]["testing"]["visualization_thresh"]:
-                print("We found an object, labeled: " + str(class_names[labels.item()] ))
+                target_label = str(class_names[labels.item()])
+                print("We found an object, labeled: " + target_label)
                 ImageDraw.ImageDraw(im=im).rectangle(xy=box, outline="yellow", width=1)
                 ImageDraw.ImageDraw(im=im).text(xy=[box[0], box[1] + 15],
-                                                text=class_names[labels.item()] + "@" + str(scores[index]),
+                                                text=target_label + "@" + str(scores[index]),
                                                 fill="blue")
                 index += 1
 

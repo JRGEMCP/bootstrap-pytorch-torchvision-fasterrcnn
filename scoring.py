@@ -144,7 +144,7 @@ def exec_evaluate(data_conf, model_conf, model, data_loader, device):
 if __name__ == "__main__":
     import json
 
-    with open("../dataset_template.json") as f:
+    with open("../dataset.json") as f:
         config_json = json.load(f)
 
     with open("../config.json") as fp:

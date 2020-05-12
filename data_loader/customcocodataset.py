@@ -8,15 +8,10 @@ from torchvision.datasets import CocoDetection
 
 class CustomCocoDataset(CocoDetection):
 
-    def __init__(self, data_conf, model_conf, testing_mode_on=False):
+    def __init__(self, data_conf, model_conf):
 
-        if testing_mode_on is False:
-            target_data_set = data_conf["image_data_training_id"]
-            coco_filename = data_conf["coco_annotations_training_id"]
-        else:
-            # This turns off returning the data in a tensor, so COCOEval can work
-            target_data_set = data_conf["image_data_testing_id"]
-            coco_filename = data_conf["coco_annotations_testing_id"]
+        target_data_set = data_conf["image_data_training_id"]
+        coco_filename = data_conf["coco_annotations_training_id"]
 
         self.coco_data_root = os.path.join(data_conf["image_pool_path"],
                                            target_data_set + "/" +
@@ -51,8 +46,6 @@ class CustomCocoDataset(CocoDetection):
             ymin = box[1]
             ymax = box[1] + box[3]
             boxes.append([xmin, ymin, xmax, ymax])
-
-        # convert everything into a torch.Tensor, unless you're performing testing (ie COCOEval)
 
         boxes = torch.as_tensor(boxes, dtype=torch.float32)
         labels = torch.ones((num_targets,), dtype=torch.int64)

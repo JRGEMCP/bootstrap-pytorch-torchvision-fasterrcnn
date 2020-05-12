@@ -10,6 +10,7 @@ from data_loader.customcocodataset import CustomCocoDataset
 from references.detection import utils
 from model.model_resnet50_faster_rcnn import get_model_instance_segmentation
 from references.detection.engine import train_one_epoch, evaluate
+from scoring import visualize_data
 
 
 def train(data_conf, model_conf, **kwargs):
@@ -41,8 +42,13 @@ def train(data_conf, model_conf, **kwargs):
                                                        collate_fn=utils.collate_fn)
 
     if model_conf["pytorch_engine"]["test_dataloader"]:
-        for object, target in training_data_loader:
-            print(str(target))
+
+        for images, targets in training_data_loader:
+
+            images = list(img.to(device) for img in images)
+            outputs = [{k: v.to(device) for k, v in t.items()} for t in targets]
+            visualize_data(data_conf, model_conf, images, outputs)
+
         return
 
     if model_conf["hyperParameters"]["net"] == "spineless_model":

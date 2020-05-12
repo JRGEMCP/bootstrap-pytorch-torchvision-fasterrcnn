@@ -7,7 +7,7 @@ import torch
 from torchvision import transforms
 from torchvision.datasets import ImageFolder
 
-from data_loader.customcocodataset_debuggers import vis_detections
+from data_loader.customcocodataset_debuggers import vis_detections, vis_ground_truth
 from model.model_resnet101_faster_rcnn import ModelResnet101FasterRCNN
 from model.model_resnet50_faster_rcnn import get_model_instance_segmentation
 from references.detection import utils
@@ -94,23 +94,25 @@ def evaluate(data_conf, model_conf, **kwargs):
     print("Evaluation complete")
 
 
-def visualize_result(data_conf, model_conf, images, image_ids, predictions):
+def visualize_data(data_conf, model_conf, images, metadatas):
 
-    assert(len(images) == len(predictions))
+    assert(len(images) == len(metadatas))
 
     for i in range(len(images)):
-        print("image tensor size is :" + str(images[i].size()))
         binary_image = transforms.ToPILImage()(images[i]).convert("RGB")
-        tagged_binary_image = vis_detections(model_conf, binary_image, data_conf["classes_available"], predictions[i])
-        # output tagged image to disk
+        if model_conf["pytorch_engine"]["test_dataloader"]:
 
-        tagged_binary_image.save(data_conf["demo_out_image_dir"]
-                                 + "/" +
-                                 model_conf["hyperParameters"]["net"]
-                                 + "/" +
-                                 data_conf["image_data_testing_id"] + "/" +
-                                 str(image_ids) + "_result.jpg", "JPEG")
-        print("done with tagged image")
+            vis_ground_truth(data_conf=data_conf,
+                             model_conf=model_conf,
+                             im=binary_image,
+                             class_names=data_conf["classes_available"],
+                             targets=metadatas[i])
+        else:
+            vis_detections(data_conf=data_conf,
+                           model_conf=model_conf,
+                           im=binary_image,
+                           class_names=data_conf["classes_available"],
+                           predictions=metadatas[i])
 
 
 @torch.no_grad()
@@ -129,11 +131,10 @@ def exec_evaluate(data_conf, model_conf, model, data_loader, device):
 
             if model_conf["hyperParameters"]["testing"]["enable_visualization"]:
 
-                visualize_result(data_conf=data_conf,
-                                 model_conf=model_conf,
-                                 images=images,
-                                 image_ids=targets[0]["image_id"],
-                                 predictions=outputs)
+                visualize_data(data_conf=data_conf,
+                               model_conf=model_conf,
+                               images=images,
+                               metadatas=outputs)
         except Exception as excp:
             print("Exception occurred on an image set " + str(images) + ".. skipping")
             raise excp

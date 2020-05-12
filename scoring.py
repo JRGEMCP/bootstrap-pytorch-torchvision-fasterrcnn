@@ -37,6 +37,7 @@ class ModelScorer(object):
         return {'accuracy': (accuracy * 100)}
 
 
+@torch.no_grad()
 def evaluate(data_conf, model_conf, **kwargs):
 
     start_time = time.time()
@@ -56,13 +57,21 @@ def evaluate(data_conf, model_conf, **kwargs):
 
     testing_dataset = ImageFolder(root=data_conf["demo_in_image_dir"], transform=transforms.Compose([transforms.ToTensor()]))
 
-    # print("found " + str(testing_dataset.get_num_categories()) + " categories in data")
-
     testing_data_loader = torch.utils.data.DataLoader(testing_dataset,
                                                        batch_size=model_conf["hyperParameters"]["batch_size"],
                                                        shuffle=False,
                                                        num_workers=model_conf["pytorch_engine_scoring"]["num_workers"],
                                                        collate_fn=utils.collate_fn)
+
+    if model_conf["pytorch_engine"]["test_dataloader"]:
+
+        for images, targets in testing_data_loader:
+
+            images = list(img.to(device) for img in images)
+            outputs = [{k: v.to(device) for k, v in t.items()} for t in targets]
+            visualize_data(data_conf, model_conf, images, outputs)
+
+        return
 
     if model_conf["hyperParameters"]["net"] == "spineless_model":
         model = get_model_instance_segmentation(data_conf=data_conf, model_conf=model_conf)
@@ -87,9 +96,31 @@ def evaluate(data_conf, model_conf, **kwargs):
 
     model.to(device)
 
-    result = exec_evaluate(data_conf=data_conf,
-                           model_conf=model_conf,
-                           model=model, data_loader=testing_data_loader, device=device)
+    model.eval()
+
+    for images, targets in testing_data_loader:
+        try:
+            images = list(img.to(device) for img in images)
+
+            outputs = model(images)
+            print("received outputs")
+            outputs = [{k: v.to(device) for k, v in t.items()} for t in outputs]
+
+            image_ids = {}
+            for filename, id in testing_data_loader.dataset.imgs:
+                image_ids[id] = filename
+
+            if model_conf["hyperParameters"]["testing"]["enable_visualization"]:
+
+                visualize_data(data_conf=data_conf,
+                               model_conf=model_conf,
+                               images=images,
+                               image_ids=image_ids,
+                               metadatas=outputs)
+        except Exception as excp:
+            print("Exception occurred on an image set " + str(images) + ".. skipping")
+            raise excp
+    print("exited image loop")
 
     print("Evaluation complete")
 
@@ -115,37 +146,8 @@ def visualize_data(data_conf, model_conf, images, metadatas, image_ids=None):
                            class_names=data_conf["classes_available"],
                            predictions=metadatas[i],
                            image_ids=image_ids)
-
-
-@torch.no_grad()
-def exec_evaluate(data_conf, model_conf, model, data_loader, device):
-    print("beginning actual eval")
-    model.eval()
-
-    print("entering image target loop")
-    for images, targets in data_loader:
-        try:
-            images = list(img.to(device) for img in images)
-
-            outputs = model(images)
-            print("received outputs")
-            outputs = [{k: v.to(device) for k, v in t.items()} for t in outputs]
-
-            image_ids = {}
-            for filename, id in data_loader.dataset.imgs:
-                image_ids[id] = filename
-
-            if model_conf["hyperParameters"]["testing"]["enable_visualization"]:
-
-                visualize_data(data_conf=data_conf,
-                               model_conf=model_conf,
-                               images=images,
-                               image_ids=image_ids,
-                               metadatas=outputs)
-        except Exception as excp:
-            print("Exception occurred on an image set " + str(images) + ".. skipping")
-            raise excp
-    print("exited image loop")
+    print("Results completed, check folder ")
+    print(data_conf["demo_out_image_dir"] + "/" + model_conf["hyperParameters"]["net"] + "/" + data_conf["image_data_testing_id"])
 
 
 if __name__ == "__main__":

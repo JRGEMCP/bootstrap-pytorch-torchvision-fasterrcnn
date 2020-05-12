@@ -78,6 +78,7 @@ if __name__ == "__main__":
         model_conf = json.load(fp)
 
     loader = CustomCocoDataset(data_conf=config_json, model_conf=model_conf)
+
     print(loader.__len__())
     print(loader.__getitem__(4))
 

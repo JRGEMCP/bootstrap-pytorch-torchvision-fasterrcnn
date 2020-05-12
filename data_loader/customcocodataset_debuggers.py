@@ -39,12 +39,12 @@ def vis_detections(data_conf, model_conf, im, class_names, predictions, image_id
 
         file_name = path_tokens[len(path_tokens) - 1]
 
-        im.save(data_conf["demo_out_image_dir"]
-                                 + "/" +
-                                 model_conf["hyperParameters"]["net"]
-                                 + "/" +
-                                 data_conf["image_data_testing_id"] + "/" +
-                                 file_name + "_result.jpg", "JPEG")
+        result_file_path = data_conf["demo_out_image_dir"] + "/" + model_conf["hyperParameters"]["net"] + "/" + data_conf["image_data_testing_id"] + "/" + file_name + "_result.jpg"
+
+        if os.path.exists(result_file_path):
+            os.remove(result_file_path)
+
+        im.save(result_file_path, "JPEG")
     return im
 
 

@@ -87,7 +87,7 @@ def train(data_conf, model_conf, **kwargs):
         return
 
     if model_conf["pytorch_engine"]["enable_tfb"]:
-        from torch.utils.tensorboard import SummaryWriter
+        from tensorboardX import SummaryWriter
         logger = SummaryWriter(output_dir + "/logs")
     else:
         logger = None
@@ -125,7 +125,7 @@ def train(data_conf, model_conf, **kwargs):
             }, save_name)
             print('save model: {}'.format(save_name))
 
-            evaluate(model, training_data_loader, device=device)
+            #evaluate(model, training_data_loader, device=device)
 
     if model_conf["pytorch_engine"]["enable_tfb"]:
         logger.close()

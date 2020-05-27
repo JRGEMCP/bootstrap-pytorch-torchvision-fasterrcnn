@@ -45,6 +45,7 @@ class CustomCocoDataset(CocoDetection):
             xmax = box[0] + box[2]
             ymin = box[1]
             ymax = box[1] + box[3]
+            assert xmin < xmax and ymin < ymax
             boxes.append([xmin, ymin, xmax, ymax])
 
         boxes = torch.as_tensor(boxes, dtype=torch.float32)

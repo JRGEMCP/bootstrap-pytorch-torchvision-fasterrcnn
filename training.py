@@ -71,13 +71,14 @@ def train(data_conf, model_conf, **kwargs):
     else:
         raise Exception("You must configure an optimizer within hyperParameters.  For example 'sgd'")
 
-    #lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer=optimizer,
-    #                                               step_size=model_conf["hyperParameters"]["learning_decay_step"],
-    #                                               gamma=model_conf["hyperParameters"]["learning_decay_gamma"])
+    lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer=optimizer,
+                                                   step_size=model_conf["hyperParameters"]["learning_decay_step"],
+                                                   gamma=model_conf["hyperParameters"]["learning_decay_gamma"])
 
-    lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer=optimizer,
-                                                        milestones=model_conf["hyperParameters"]["learning_decay_milestones"],
-                                                        gamma=model_conf["hyperParameters"]["learning_decay_gamma"])
+
+    #lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer=optimizer,
+    #                                                    milestones=model_conf["hyperParameters"]["learning_decay_milestones"],
+    #                                                    gamma=model_conf["hyperParameters"]["learning_decay_gamma"])
 
     # lr_scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer=optimizer,
     #                                                      gamma=model_conf["hyperParameters"]["learning_decay_gamma"])

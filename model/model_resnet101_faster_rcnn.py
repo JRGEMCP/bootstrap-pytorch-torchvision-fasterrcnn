@@ -72,4 +72,5 @@ class ModelResnet101FasterRCNN(FasterRCNN):
                          rpn_pre_nms_top_n_train=model_conf["hyperParameters"]["rpn_pre_nms_top_n_train"],
                          rpn_post_nms_top_n_train=model_conf["hyperParameters"]["rpn_post_nms_top_n_train"],
                          rpn_nms_thresh=model_conf["hyperParameters"]["rpn_nms_thresh"],
-                         min_size=model_conf["hyperParameters"]["min_size_image"])
+                         min_size=model_conf["hyperParameters"]["min_size_image"],
+                         max_size=model_conf["hyperParameters"]["max_size_image"])
